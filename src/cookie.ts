@@ -4,9 +4,16 @@ import db from 'src/sqlite'
 
 const selectMyInfo = db.prepare('SELECT * FROM account WHERE id = 1')
 const { cookies, user_id } = selectMyInfo.get() as { id: number, cookies: string, user_id: string }
-selectMyInfo.finalize()
-let cookieArray: Cookie[] = cookies ? JSON.parse(cookies) : await getAndSaveCookies()
 let userId: string = user_id
+selectMyInfo.finalize()
+let cookieArray: Cookie[] | undefined
+if (cookies) {
+    cookieArray = JSON.parse(cookies)
+} else {
+    cookieArray = await getAndSaveCookies()
+}
+
+
 async function getAndSaveCookies() {
     try {
         let cookieArray = await Login(process.env.USERNAME, process.env.PASSWORD);

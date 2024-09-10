@@ -178,3 +178,5 @@ dist
 *-lock.yaml
 
 *.db
+
+.env

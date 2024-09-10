@@ -3,6 +3,9 @@
   "module": "index.ts",
   "type": "module",
   "typings": "index.d.ts",
+  "scripts": {
+    "start": "bun run src/index.ts"
+  },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/terminal-kit": "^2.5.6"

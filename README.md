@@ -1,15 +1,7 @@
-# ttt
+# pixiv downloader
 
-To install dependencies:
+## 使用说明
 
-```bash
-bun install
-```
+**只在 MAC 平台开发,其他平台均未测试**
 
-To run:
-
-```bash
-bun run index.ts
-```
-
-This project was created using `bun init` in bun v1.1.26. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+> 如果想要保存照片的作者、标签和描述,请先使用 `brew install tag` 和 `sudo cp /opt/homebrew/bin/tag /usr/local/bin`

@@ -3,6 +3,10 @@ export interface ImgInfos {
     zoneConfig: ZoneConfig;
     extraData: ExtraData;
 }
+export interface ImgTag {
+    tag: string,
+    tag_translation: string
+}
 
 interface ExtraData {
     meta: Meta;

@@ -3,6 +3,7 @@ declare module "bun" {
         USERNAME: string;
         PASSWORD: string;
         DOWNLOADLOCATION: string;
+        SAVEEXTRAINFO: string;
     }
 }
 import type pixiv from "./types/pixiv";

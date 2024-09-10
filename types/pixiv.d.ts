@@ -6,7 +6,7 @@ export interface userExtraResult {
     background?: any
 }
 export interface CanSendResult {
-    canSend: boolean
+    can_send: boolean
 }
 
 export declare type Lang = 'zh' | string

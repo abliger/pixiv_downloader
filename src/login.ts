@@ -13,20 +13,20 @@ enum LoginMateData {
  * @returns Cookies[]
  */
 export async function Login(username: string, password: string): Promise<Cookie[]> {
-    const browser = await puppeteer.launch({ headless: Boolean(process.env.HEADLESS) });
-    const page = await browser.newPage();
-    await page.goto(LoginMateData.LoginPath);
-    await scroll(800, page)
-    await page.locator(LoginMateData.UserInputLocation).fill(username);
-    await page.locator(LoginMateData.PasswordInputLocation).fill(password);
-    await sleep(Math.floor(Math.random() * 100))
-    await page.locator(LoginMateData.ToLoginButtonLocation).click();
-    while (page.url() === LoginMateData.LoginPath) {
-        await sleep(1000)
-    }
-    let cookies = await page.cookies()
-    await browser.close();
-    return cookies
+  const browser = await puppeteer.launch({ headless: Boolean(process.env.HEADLESS) })
+  const page = await browser.newPage()
+  await page.goto(LoginMateData.LoginPath)
+  await scroll(800, page)
+  await page.locator(LoginMateData.UserInputLocation).fill(username)
+  await page.locator(LoginMateData.PasswordInputLocation).fill(password)
+  await sleep(Math.floor(Math.random() * 100))
+  await page.locator(LoginMateData.ToLoginButtonLocation).click()
+  while (page.url() === LoginMateData.LoginPath) {
+    await sleep(1000)
+  }
+  const cookies = await page.cookies()
+  await browser.close()
+  return cookies
 }
 const sleep = (b: number): Promise<void> => new Promise((a) => setTimeout(a, b))
 
@@ -36,15 +36,15 @@ const sleep = (b: number): Promise<void> => new Promise((a) => setTimeout(a, b))
  * @param page 当前页面对象
  */
 async function scroll(toTop: number, page: Page) {
-    let currentHeight = 0
-    while (currentHeight < toTop) {
-        let interval = Math.floor(Math.random() * 10)
-        currentHeight += Math.floor(Math.random() * 10)
-        await page.locator('html').scroll({
-            scrollTop: currentHeight
-        })
-        await sleep(interval)
-    }
+  let currentHeight = 0
+  while (currentHeight < toTop) {
+    const interval = Math.floor(Math.random() * 10)
+    currentHeight += Math.floor(Math.random() * 10)
+    await page.locator('html').scroll({
+      scrollTop: currentHeight
+    })
+    await sleep(interval)
+  }
 }
 
 

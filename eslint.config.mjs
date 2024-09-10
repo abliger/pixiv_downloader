@@ -3,10 +3,14 @@ import tseslint from 'typescript-eslint'
 import pluginJs from '@eslint/js'
 export default tseslint.config(
   { files: ['**/*.{js,mjs,cjs,ts}'] },
-  { languageOptions: { globals: globals.es2022 } },
+  { languageOptions: { globals: {
+    ...globals.nodeBuiltin,
+    ...globals.es2025
+  } } },
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
   {
+    ignores:['node_modules','types'],
     rules: {
       'no-empty-pattern': 'off', // 进制空结构
       'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
@@ -26,6 +30,7 @@ export default tseslint.config(
       eqeqeq: ['error', 'smart'], // 要求使用 === 和 !==
       'prefer-promise-reject-errors': 'off', // 要求使用 Error 对象作为 Promise 拒绝的原因
       'no-tabs': ['error', { allowIndentationTabs: true }], // 禁用 tab
-      "@typescript-eslint/no-require-imports": "off"
+      complexity: ['error',10], // 圈复杂度 报错需要优化代码,
+      '@typescript-eslint/no-require-imports': 'off'
     }
   })

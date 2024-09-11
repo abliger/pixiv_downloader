@@ -25,7 +25,7 @@ export function http(log = messageLog) {
       protocol: 'http'
     },
     headers: getAuthHeaders(),
-    timeout: 1000000,
+    timeout: 10000,
   })
 
   service.interceptors.response.use(

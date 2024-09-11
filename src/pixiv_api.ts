@@ -164,7 +164,8 @@ class Pixiv {
     const date = new Date(img_info.illust_details.reupload_timestamp ? img_info.illust_details.reupload_timestamp * 1000 : img_info.illust_details.upload_timestamp * 1000)
     if (Number(img_info.illust_details.page_count) === 1) {
       const count = selectImgByUrl.get(img_info.illust_details.url_big) as { count: number }
-      const fileName = this.getfileName(img_info.author_details.user_name, img_info.illust_details.title, img_info.illust_details.id, date)
+      // const fileName = this.getfileName(img_info.author_details.user_name, img_info.illust_details.title, img_info.illust_details.id, date)
+      const fileName = this.getfileName(img_info.illust_details.author_details.user_name, img_info.illust_details.title, img_info.illust_details.id, date)
       const flag = await Bun.file(fileName).exists()
       if (flag) {
         if (count.count === 0) {
@@ -185,7 +186,8 @@ class Pixiv {
           return null
         }
         const count = selectImgByUrl.get(url.url_big) as { count: number }
-        const fileName = this.getFileNameDoc(img_info.author_details.user_name, img_info.illust_details.title, img_info.illust_details.id, date, url.page)
+        // const fileName = this.getFileNameDoc(img_info.author_details.user_name, img_info.illust_details.title, img_info.illust_details.id, date, url.page)
+        const fileName = this.getFileNameDoc(img_info.illust_details.author_details.user_name, img_info.illust_details.title, img_info.illust_details.id, date, url.page)
         const flag = await Bun.file(fileName).exists()
         if (flag) {
           if (count.count === 0) {

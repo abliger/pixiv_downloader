@@ -8,9 +8,11 @@ import type { PhoneImgDownloadInfo } from 'types/phoneImgDownloadInfo'
 
 // 开始查询 redownloadimg 表 重新下载超时照片
 const all =selectReDownloadImg.all() as {id:string,img_id:string,content:string,url:string,finish:boolean}[]
+const spinnerImg = term.spinnerEq('spinnerSuffix')
 for (const img of all) {
-  term.spinner('下载超市图片\n')
-  const info: PhoneImgDownloadInfo=JSON.parse(img.content)
+  const info={illust_details:JSON.parse(img.content)} as PhoneImgDownloadInfo
+  term.spinner(`下载超时图片 作者: ${info.illust_details.author_details.user_name} 图片: ${info.illust_details.title?info.illust_details.title:'unknow'} id: ${info.illust_details.id}`)
+  spinnerImg(all.length)
   await pixiv_api.download(info)
   updateReDownloadImg.run(img.id)
 }

@@ -55,14 +55,18 @@ if (needDownloadUser.length === 0) {
     spinnerUser(needDownloadUser.length)
     // 如果有结果没有获得到,过滤掉,该用户设置为完成
     let flag = false
-    const imgAll = await util.getUserImgAllByPhone(u.user_id).then(v => v.filter(v => {
+    let imgAll = await util.getUserImgAllByPhone(u.user_id)
+    if(imgAll.length ===0){
+      updateFollowUser.run(u.user_id) 
+    }
+    imgAll=imgAll.filter(v => {
       if (v) {
         return v
       } else {
         flag = true
         return false
       }
-    }))
+    })
     if (imgAll.length === 0) {
       continue
     }

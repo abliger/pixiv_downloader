@@ -3,7 +3,7 @@ import pixiv_api from './pixiv_api'
 import type { Displaytag } from 'types/phoneImgDownloadInfo'
 import { exiftool } from 'exiftool-vendored'
 import { downloadImg } from './axios'
-import { insetReDownloadImg } from './sqlite'
+import { insetReDownloadImg, selectReDownloadImgByUrl } from './sqlite'
 
 export default {
   async getUserImgAll(userid: string) {
@@ -58,7 +58,19 @@ export default {
       await Bun.write(Bun.file(fileName), v.data)
       this.writeExtraFileInfo(fileName, description, tag)
     }).catch(() => {
-      insetReDownloadImg.run(id, content, url, false)
+      let countTimeout =0 
+      setInterval(()=>{
+        countTimeout = 0
+      },100000)
+      countTimeout +=1
+    
+      const count = selectReDownloadImgByUrl.get(url) as {count:number}
+      if(count.count === 0){
+        insetReDownloadImg.run(id, content, url, false)
+      }
+      if(countTimeout >10){
+        throw new Error('网络不稳定,请稍后再试')
+      }
     })
   }
 }

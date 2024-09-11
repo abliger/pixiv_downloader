@@ -9,6 +9,7 @@ import type { PhoneImgDownloadInfo } from 'types/phoneImgDownloadInfo'
 // 开始查询 redownloadimg 表 重新下载超时照片
 const all =selectReDownloadImg.all() as {id:string,img_id:string,content:string,url:string,finish:boolean}[]
 const spinnerImg = term.spinnerEq('spinnerSuffix')
+// todo use child_process
 for (const img of all) {
   const info={illust_details:JSON.parse(img.content)} as PhoneImgDownloadInfo
   term.spinner(`下载超时图片 作者: ${info.illust_details.author_details.user_name} 图片: ${info.illust_details.title?info.illust_details.title:'unknow'} id: ${info.illust_details.id}`)

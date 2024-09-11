@@ -3,8 +3,17 @@ import cookie from './cookie'
 import pixiv_api from './pixiv_api'
 import term from './term'
 import util from './util'
-import { insertFollowUserAndGetNotFinish, selectFollowUser, updateFollowUser } from './sqlite'
+import { insertFollowUserAndGetNotFinish, selectFollowUser, selectReDownloadImg, updateFollowUser, updateReDownloadImg } from './sqlite'
+import type { PhoneImgDownloadInfo } from 'types/phoneImgDownloadInfo'
 
+// 开始查询 redownloadimg 表 重新下载超时照片
+const all =selectReDownloadImg.all() as {id:string,img_id:string,content:string,url:string,finish:boolean}[]
+for (const img of all) {
+  term.spinner('下载超市图片\n')
+  const info: PhoneImgDownloadInfo=JSON.parse(img.content)
+  await pixiv_api.download(info)
+  updateReDownloadImg.run(img.id)
+}
 // 获得用户
 term.spinner('正在获取用户信息\n')
 let needDownloadUser = selectFollowUser.all() as { user_name: string, user_id: string, user_comment: string, finish: boolean }[]
@@ -25,6 +34,8 @@ const flag = await term.inputBool('开始下载')
 if (!flag) {
   process.exit()
 }
+
+
 // 如果 needDownloadUser 为空,只去最新的图片去下载 followLatestIllust
 if (needDownloadUser.length === 0) {
   term.writeLine('下载最新图片\n')
@@ -35,6 +46,7 @@ if (needDownloadUser.length === 0) {
     await pixiv_api.download(info)
   }
 } else {
+  // 遍历用户开始下载
   const spinnerUser = term.spinnerEq('spinnerPrefix')
   for (const u of needDownloadUser) {
     spinnerUser(needDownloadUser.length)

@@ -2,6 +2,7 @@ import globals from 'globals'
 import tseslint from 'typescript-eslint'
 import pluginJs from '@eslint/js'
 export default tseslint.config(
+  { ignores:['types']},
   { files: ['**/*.{js,mjs,cjs,ts}'] },
   { languageOptions: { globals: {
     ...globals.nodeBuiltin,
@@ -10,7 +11,6 @@ export default tseslint.config(
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    ignores:['node_modules','types'],
     rules: {
       'no-empty-pattern': 'off', // 进制空结构
       'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',

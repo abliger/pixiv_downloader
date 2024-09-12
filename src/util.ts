@@ -68,6 +68,7 @@ export default {
       if(count.count === 0){
         insetReDownloadImg.run(id, content, url, false)
       }
+      // 100 秒内超时10次退出程序
       if(countTimeout >10){
         throw new Error('网络不稳定,请稍后再试')
       }

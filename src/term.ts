@@ -68,9 +68,9 @@ class termLine {
     const totalLength = 20
     let eqLength = 0
     return (imgLength: number) => {
+      current += 1
       this[name](`[${Array(eqLength).fill('=').join('') + Array(totalLength - eqLength).fill(' ').join('')}] ${current}/${imgLength}`)
       eqLength = Math.floor(current / (imgLength / totalLength)) + 1
-      current += 1
     }
   }
 }

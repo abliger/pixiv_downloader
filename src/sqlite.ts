@@ -41,7 +41,7 @@ export const updateFollowUser = db.prepare('update follow_user set finish=1 wher
 export const insertImg = db.prepare('insert into img(img_id,content,url) values(?,?,?)')
 export const selectImgByUrl = db.prepare('select count(*) count from img where url=?')
 export const selectReDownloadImg = db.prepare('select * from reDownloadImg where finish=0')
-export const selectReDownloadImgByUrl = db.prepare('select count(*) from reDownloadImg where finish=0 and url=?')
+export const selectReDownloadImgByUrl = db.prepare('select count(*) count from reDownloadImg where finish=0 and url=?')
 export const insetReDownloadImg = db.prepare('insert into reDownloadImg(img_id,content,url,finish) values(?,?,?,?)')
 export const updateReDownloadImg = db.prepare('update reDownloadImg set finish=1 where id=?')
 export default db

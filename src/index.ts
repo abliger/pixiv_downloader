@@ -61,7 +61,7 @@ for (const u of needDownloadUser) {
   spinnerUser(needDownloadUser.length)
   // 如果有结果没有获得到,过滤掉,该用户设置为完成
   let flag = false
-  let imgAll = await util.getUserImgAllByPhone(u.user_id)
+  let imgAll = await util.getUserImgAllByPhone(u.user_id,u.user_name)
   if(imgAll.length ===0){
     updateFollowUser.run(u.user_id) 
   }

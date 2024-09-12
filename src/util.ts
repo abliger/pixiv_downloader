@@ -4,6 +4,7 @@ import type { Displaytag, PhoneImgDownloadInfo } from 'types/phoneImgDownloadInf
 import { exiftool } from 'exiftool-vendored'
 import { downloadImg } from './axios'
 import { insetReDownloadImg, selectImgByImgId, selectReDownloadImgByUrl } from './sqlite'
+import term from './term'
 
 let countTimeout =0 
 setInterval(()=>{
@@ -32,7 +33,7 @@ export default {
     }
     return [imgInfos, imgTags]
   },
-  async getUserImgAllByPhone(userId: string) {
+  async getUserImgAllByPhone(userId: string,userName:string) {
     // 23739239 虽然可以查看图片蛋 返回 false
     // let { can_send } = await pixiv_api.isUserCanSend(userId)
     // if (!can_send) {
@@ -50,7 +51,10 @@ export default {
     
     const imgs:PhoneImgDownloadInfo[]=[]
     let currentId=0
+    term.spinner(`获得 ${userName} 的插画信息`)
+    const termSuffix=term.spinnerEq('spinnerSuffix')
     while(currentId<=imgIds.length){
+      termSuffix(Math.floor(imgIds.length/5))
       const ids=imgIds.slice(currentId,currentId+5)
       const imgTemp=await Promise.all(ids.map(async v => {
         return await pixiv_api.getImgTagInfo_Tag_Info_DownloadInfo(v)

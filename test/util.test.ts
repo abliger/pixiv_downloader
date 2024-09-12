@@ -41,14 +41,14 @@ describe('util.ts getUserImgAll', () => {
 
   test('getUserImgAllByPhone', async() => {
     const userId = '95799131'
-    const info = await util.getUserImgAllByPhone(userId)
+    const info = await util.getUserImgAllByPhone(userId,'test')
     // console.log(info);
     expect(info.length).toBeGreaterThan(300)
   }, 100000)
 
   test('getUserImgAllByPhone', async() => {
     const userId = '63335418'
-    const info = await util.getUserImgAllByPhone(userId)
+    const info = await util.getUserImgAllByPhone(userId,'test')
     // console.log(info);
     expect(info.length).toEqual(0)
   }, 100000)

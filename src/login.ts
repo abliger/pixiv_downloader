@@ -19,17 +19,15 @@ export async function Login(username: string, password: string): Promise<Cookie[
   await scroll(800, page)
   await page.locator(LoginMateData.UserInputLocation).fill(username)
   await page.locator(LoginMateData.PasswordInputLocation).fill(password)
-  await sleep(Math.floor(Math.random() * 100))
+  await Bun.sleep(Math.floor(Math.random() * 100))
   await page.locator(LoginMateData.ToLoginButtonLocation).click()
   while (page.url() === LoginMateData.LoginPath) {
-    await sleep(1000)
+    await Bun.sleep(1000)
   }
   const cookies = await page.cookies()
   await browser.close()
   return cookies
 }
-const sleep = (b: number): Promise<void> => new Promise((a) => setTimeout(a, b))
-
 /**
  * 模拟用户翻滚 
  * @param toTop 滚动高度
@@ -43,7 +41,7 @@ async function scroll(toTop: number, page: Page) {
     await page.locator('html').scroll({
       scrollTop: currentHeight
     })
-    await sleep(interval)
+    await Bun.sleep(interval)
   }
 }
 

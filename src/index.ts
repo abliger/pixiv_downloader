@@ -3,6 +3,7 @@ import cookie from './cookie'
 import pixiv_api from './pixiv_api'
 import term from './term'
 import util from './util'
+
 import { insertFollowUserAndGetNotFinish, selectImgByImgId, selectReDownloadImg, updateFollowUser, updateReDownloadImg } from './sqlite'
 import type { PhoneImgDownloadInfo } from 'types/phoneImgDownloadInfo'
 
@@ -85,6 +86,7 @@ for (const u of needDownloadUser) {
   if (!flag) {
     updateFollowUser.run(u.user_id)
   }
+  imgAll=[]
 }
 term.closeSpinner()
 process.exit()

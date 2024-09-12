@@ -3,7 +3,12 @@ import pixiv_api from './pixiv_api'
 import type { Displaytag, PhoneImgDownloadInfo } from 'types/phoneImgDownloadInfo'
 import { exiftool } from 'exiftool-vendored'
 import { downloadImg } from './axios'
-import { insetReDownloadImg, selectImgByInImgIdGroupByImgId, selectReDownloadImgByUrl } from './sqlite'
+import { insetReDownloadImg, selectImgByImgId, selectReDownloadImgByUrl } from './sqlite'
+
+let countTimeout =0 
+setInterval(()=>{
+  countTimeout = 0
+},100000)
 
 export default {
   async getUserImgAll(userid: string) {
@@ -37,25 +42,24 @@ export default {
     if (!userAllInfo) {
       return []
     }
-    let imgIds = Object.keys(userAllInfo.illusts)
-    const ids=selectImgByInImgIdGroupByImgId.all(imgIds.join(',')) as{img_id:string}[]
-    const idss=ids.map(v=>v.img_id)
-    imgIds = imgIds.filter(v=>!idss.includes(v))
+    // todo bun sqlite where in operate is error
+    const imgIds = Object.keys(userAllInfo.illusts).filter(v=>{
+      const count =selectImgByImgId.get(v) as {count:number}
+      return count.count===0?true:false
+    })
+    
     const imgs:PhoneImgDownloadInfo[]=[]
     let currentId=0
     while(currentId<=imgIds.length){
-      const imgTemp=await Promise.all(imgIds.slice(currentId,currentId+5).map(async v => {
+      const ids=imgIds.slice(currentId,currentId+5)
+      const imgTemp=await Promise.all(ids.map(async v => {
         return await pixiv_api.getImgTagInfo_Tag_Info_DownloadInfo(v)
       })).catch(()=>[])
       imgs.push(...imgTemp)
       currentId+=5
       //  如果作者插画太多,减慢请求频率
       if(imgIds.length>50){
-        await new Promise((r)=>{
-          setTimeout(()=>{
-            r(null)
-          },3000)
-        })
+        await Bun.sleep(3000)
       }
     }
     return imgs
@@ -68,6 +72,7 @@ export default {
       MDItemUserTags: tag
     })
   },
+  
   async download(fileName: string, url: string, description: string, tag: string[], id: string, content: string) {
     return await downloadImg().get(url, {
       responseType: 'arraybuffer'
@@ -75,12 +80,7 @@ export default {
       await Bun.write(Bun.file(fileName), v.data)
       this.writeExtraFileInfo(fileName, description, tag)
     }).catch(() => {
-      let countTimeout =0 
-      setInterval(()=>{
-        countTimeout = 0
-      },100000)
       countTimeout +=1
-    
       const count = selectReDownloadImgByUrl.get(url) as {count:number}
       if(count.count === 0){
         insetReDownloadImg.run(id, content, url, false)

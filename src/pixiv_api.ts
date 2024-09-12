@@ -70,7 +70,7 @@ class Pixiv {
     }
 
     const bigUsers = await Promise.all(getFollowingUserIter(this))
-    bigUsers.forEach(v => {
+    bigUsers.filter(v=>v).forEach(v => {
       user.push(...v.users)
     })
     return user

@@ -3,7 +3,7 @@ import pixiv_api from './pixiv_api'
 import type { Displaytag, PhoneImgDownloadInfo } from 'types/phoneImgDownloadInfo'
 import { exiftool } from 'exiftool-vendored'
 import { downloadImg } from './axios'
-import { insetReDownloadImg, selectReDownloadImgByUrl } from './sqlite'
+import { insetReDownloadImg, selectImgByInImgIdGroupByImgId, selectReDownloadImgByUrl } from './sqlite'
 
 export default {
   async getUserImgAll(userid: string) {
@@ -37,14 +37,16 @@ export default {
     if (!userAllInfo) {
       return []
     }
-    const imgIds = Object.keys(userAllInfo.illusts)
-    // let imgInfos: PhoneImgDownloadInfo[] = []
+    let imgIds = Object.keys(userAllInfo.illusts)
+    const ids=selectImgByInImgIdGroupByImgId.all(imgIds.join(',')) as{img_id:string}[]
+    const idss=ids.map(v=>v.img_id)
+    imgIds = imgIds.filter(v=>!idss.includes(v))
     const imgs:PhoneImgDownloadInfo[]=[]
     let currentId=0
     while(currentId<=imgIds.length){
       const imgTemp=await Promise.all(imgIds.slice(currentId,currentId+5).map(async v => {
         return await pixiv_api.getImgTagInfo_Tag_Info_DownloadInfo(v)
-      }))
+      })).catch(()=>[])
       imgs.push(...imgTemp)
       currentId+=5
       //  如果作者插画太多,减慢请求频率

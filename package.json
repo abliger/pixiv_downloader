@@ -5,7 +5,8 @@
   "typings": "index.d.ts",
   "scripts": {
     "start": "bun run src/index.ts",
-    "cron": "sudo echo '0 0 12 * * cd /Users/fengsixue/Desktop/ttt/|bun run /Users/fengsixue/Desktop/ttt/src/index.ts'| crontab",
+    "build": "bun build src/index.ts --compile --outfile pixivDownload",
+    "cron": "sudo echo '0 0 12 * * cd /Users/fengsixue/Desktop/ttt/|./pixivDownload'| crontab",
     "removeCron": "crontab -r"
   },
   "devDependencies": {

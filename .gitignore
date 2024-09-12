@@ -180,3 +180,5 @@ dist
 *.db
 
 .env
+
+pixivDownload

@@ -54,7 +54,7 @@ export default {
     term.spinner(`获得 ${userName} 的插画信息`)
     const termSuffix=term.spinnerEq('spinnerSuffix')
     while(currentId<=imgIds.length){
-      termSuffix(Math.floor(imgIds.length/5))
+      termSuffix(Math.floor(imgIds.length/5)+1)
       const ids=imgIds.slice(currentId,currentId+5)
       const imgTemp=await Promise.all(ids.map(async v => {
         return await pixiv_api.getImgTagInfo_Tag_Info_DownloadInfo(v)

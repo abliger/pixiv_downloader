@@ -1,6 +1,6 @@
 import type { ImgInfo, ImgTag } from 'types/img_info'
 import pixiv_api from './pixiv_api'
-import type { Displaytag } from 'types/phoneImgDownloadInfo'
+import type { Displaytag, PhoneImgDownloadInfo } from 'types/phoneImgDownloadInfo'
 import { exiftool } from 'exiftool-vendored'
 import { downloadImg } from './axios'
 import { insetReDownloadImg, selectReDownloadImgByUrl } from './sqlite'
@@ -39,9 +39,24 @@ export default {
     }
     const imgIds = Object.keys(userAllInfo.illusts)
     // let imgInfos: PhoneImgDownloadInfo[] = []
-    return await Promise.all(imgIds.map(async v => {
-      return await pixiv_api.getImgTagInfo_Tag_Info_DownloadInfo(v)
-    }))
+    const imgs:PhoneImgDownloadInfo[]=[]
+    let currentId=0
+    while(currentId<=imgIds.length){
+      const imgTemp=await Promise.all(imgIds.slice(currentId,currentId+5).map(async v => {
+        return await pixiv_api.getImgTagInfo_Tag_Info_DownloadInfo(v)
+      }))
+      imgs.push(...imgTemp)
+      currentId+=5
+      //  如果作者插画太多,减慢请求频率
+      if(imgIds.length>50){
+        await new Promise((r)=>{
+          setTimeout(()=>{
+            r(null)
+          },3000)
+        })
+      }
+    }
+    return imgs
   },
   async writeExtraFileInfo(fileName: string, description: string, tag: string[]) {
     return await exiftool.write(fileName, {

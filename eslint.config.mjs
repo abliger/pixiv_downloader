@@ -33,4 +33,5 @@ export default tseslint.config(
       complexity: ['error',10], // 圈复杂度 报错需要优化代码,
       '@typescript-eslint/no-require-imports': 'off'
     }
-  })
+  }
+)

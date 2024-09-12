@@ -5,7 +5,7 @@
   "typings": "index.d.ts",
   "scripts": {
     "start": "bun run src/index.ts",
-    "cron": "sudo echo '0 0 12 * * bun run /Users/fengsixue/Desktop/ttt/src/index.ts'| crontab",
+    "cron": "sudo echo '0 0 12 * * cd /Users/fengsixue/Desktop/ttt/|bun run /Users/fengsixue/Desktop/ttt/src/index.ts'| crontab",
     "removeCron": "crontab -r"
   },
   "devDependencies": {

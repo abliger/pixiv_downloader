@@ -3,7 +3,7 @@ import cookie from './cookie'
 import pixiv_api from './pixiv_api'
 import term from './term'
 import util from './util'
-import { insertFollowUserAndGetNotFinish, selectReDownloadImg, updateFollowUser, updateReDownloadImg } from './sqlite'
+import { insertFollowUserAndGetNotFinish, selectImgByImgId, selectReDownloadImg, updateFollowUser, updateReDownloadImg } from './sqlite'
 import type { PhoneImgDownloadInfo } from 'types/phoneImgDownloadInfo'
 
 // 开始查询 redownloadimg 表 重新下载超时照片
@@ -42,10 +42,16 @@ term.writeLine('下载最新图片\n')
 const spinnerImgNew = term.spinnerEq('spinnerSuffix')
 const imgs = await pixiv_api.followLatestIllust()
 for (const imgid of imgs.page.ids) {
-  // todo 如果ID重复 跳过查询
+  // todo 添加 img 表 total 字段. 当 id 对应多个图片时,判断是否有图片未下载
   spinnerImgNew(imgs.page.ids.length)
+  const count =selectImgByImgId.get(imgid) as{count:number}
+  if(count){
+    continue
+  }
   const info = await pixiv_api.getImgTagInfo_Tag_Info_DownloadInfo(String(imgid))
-  await pixiv_api.download(info)
+  if(info){
+    await pixiv_api.download(info)
+  }
 }
 
 // 遍历用户开始下载

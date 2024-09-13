@@ -5,9 +5,10 @@ import type { UserLatestResult } from 'types/user_latest'
 import type { ImgDownloadInfo } from 'types/img_download_info'
 import type {  ImgInfos, ImgTag } from 'types/img_info'
 import type { FollowUserInfo, User } from 'types/follow_user_info'
-import type { PhoneImgDownloadInfo } from 'types/phoneImgDownloadInfo'
+import type { Mangaa, PhoneImgDownloadInfo } from 'types/phoneImgDownloadInfo'
 import util, { translationTag } from './util'
 import { insertImg, selectImgByUrl } from './sqlite'
+import term from './term'
 
 const service = http()
 const phoneService = phoneHttp()
@@ -59,7 +60,12 @@ class Pixiv {
   }
   async getFollowPageInfoAll(userId: string) {
     const user: User[] = []
-    const { users, total } = await this.getFollowPageInfo(userId)
+    const info = await this.getFollowPageInfo(userId)
+    if(!info){
+      term.writeLine('获取不到最新用户数据,从数据库查找用户')
+      return []
+    }
+    const { users, total } = info
     user.push(...users)
     function* getFollowingUserIter(that: Pixiv) {
       let currentPage = 1
@@ -181,27 +187,37 @@ class Pixiv {
     const imgInfos = img_info.illust_details.manga_a
     let current = 0
     while (current < imgInfos.length) {
-      await Promise.all(imgInfos.slice(current, current + 4).map(async(url) => {
-        if (!url) {
-          return null
-        }
-        const count = selectImgByUrl.get(url.url_big) as { count: number }
-        // const fileName = this.getFileNameDoc(img_info.author_details.user_name, img_info.illust_details.title, img_info.illust_details.id, date, url.page)
-        const fileName = this.getFileNameDoc(img_info.illust_details.author_details.user_name, img_info.illust_details.title, img_info.illust_details.id, date, url.page)
-        const flag = await Bun.file(fileName).exists()
-        if (flag) {
-          if (count.count === 0) {
-            insertImg.run(img_info.illust_details.id, url.page === 0 ? contentStr : '', url.url_big)
-          }
-          return
-        }
-        await util.download(fileName, url.url_big, img_info.illust_details.meta.twitter_card.description,
-          translationTag(img_info.illust_details.tags, img_info.illust_details.display_tags), img_info.illust_details.id, contentStr)
-        insertImg.run(img_info.illust_details.id, url.page === 0 ? contentStr : '', url.url_big)
-      }))
+      const arr=imgInfos.slice(current, current + 4)
+      const promise=[]
+      for  (const url of  arr) {
+        promise.push(this.getPromiseDownload(url,img_info,contentStr,date))
+      }
+      await Promise.all(promise)
+      const url=arr.filter(v=>v.page===0)
+      if(url.length){
+        insertImg.run(img_info.illust_details.id, url[0].page === 0 ? contentStr : '', url[0].url_big)
+      }
       current += 4
     }
   }
+
+  private async getPromiseDownload(url:Mangaa,img_info:PhoneImgDownloadInfo,contentStr:string,date:Date){
+    if (!url) {
+      return
+    }
+    const count = selectImgByUrl.get(url.url_big) as { count: number }
+    const fileName = this.getFileNameDoc(img_info.illust_details.author_details.user_name, img_info.illust_details.title, img_info.illust_details.id, date, url.page)
+    const flag = await Bun.file(fileName).exists()
+    if (flag) {
+      if (count.count === 0) {
+        insertImg.run(img_info.illust_details.id, url.page === 0 ? contentStr : '', url.url_big)
+      }
+      return
+    }
+    return util.download(fileName, url.url_big, img_info.illust_details.meta.twitter_card.description,
+      translationTag(img_info.illust_details.tags, img_info.illust_details.display_tags), img_info.illust_details.id, contentStr)
+  }
+
   private getfileName(userName: string, title: string, imgId: string, date: Date) {
     return process.env.DOWNLOADLOCATION + `${userName}/${title}-${date.getFullYear()}-${date.getMonth()}-${date.getDay()}--${imgId}.jpeg`
   }

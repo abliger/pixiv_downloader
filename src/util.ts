@@ -1,10 +1,10 @@
 import type { ImgInfo, ImgTag } from 'types/img_info'
 import pixiv_api from './pixiv_api'
 import type { Displaytag, PhoneImgDownloadInfo } from 'types/phoneImgDownloadInfo'
-import { exiftool } from 'exiftool-vendored'
 import { downloadImg } from './axios'
 import { insetReDownloadImg, selectImgByImgId, selectReDownloadImgByUrl } from './sqlite'
 import term from './term'
+import { exiftool } from 'exiftool-vendored'
 
 let countTimeout =0 
 setInterval(()=>{
@@ -34,11 +34,6 @@ export default {
     return [imgInfos, imgTags]
   },
   async getUserImgAllByPhone(userId: string,userName:string) {
-    // 23739239 虽然可以查看图片蛋 返回 false
-    // let { can_send } = await pixiv_api.isUserCanSend(userId)
-    // if (!can_send) {
-    //     throw new Error(`${can_send} 该用户ID ${userId} 不能发送信息`)
-    // }
     const userAllInfo = await pixiv_api.getUserProfileAll(userId)
     if (!userAllInfo) {
       return []
@@ -63,26 +58,24 @@ export default {
       currentId+=5
       //  如果作者插画太多,减慢请求频率
       if(imgIds.length>50){
-        await Bun.sleep(3000)
+        await Bun.sleep(100)
       }
     }
     return imgs
   },
   async writeExtraFileInfo(fileName: string, description: string, tag: string[]) {
-    return await exiftool.write(fileName, {
+    const result= await exiftool.write(fileName, {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       MDItemFinderComment: description,
       MDItemUserTags: tag
     })
+    return result
   },
   
   async download(fileName: string, url: string, description: string, tag: string[], id: string, content: string) {
-    return await downloadImg().get(url, {
+    const data=await downloadImg().get(url, {
       responseType: 'arraybuffer'
-    }).then(async v => {
-      await Bun.write(Bun.file(fileName), v.data)
-      this.writeExtraFileInfo(fileName, description, tag)
     }).catch(() => {
       countTimeout +=1
       const count = selectReDownloadImgByUrl.get(url) as {count:number}
@@ -94,9 +87,13 @@ export default {
         throw new Error('网络不稳定,请稍后再试')
       }
     })
+    if(data){
+      await Bun.write(Bun.file(fileName), data.data)
+      await this.writeExtraFileInfo(fileName, description, tag)
+    }
   }
 }
-export function objMix<T extends { [U in keyof T]: unknown }>(arrOut: T[], oriArr: T[], key: keyof T) {
+export function objMix<T>(arrOut: T[], oriArr: T[], key: keyof T) {
   oriArr.forEach((t) => {
     let flag = true
     arrOut.forEach(e => {

@@ -7,6 +7,7 @@ import util from './util'
 import { insertFollowUserAndGetNotFinish, selectImgByImgId, selectReDownloadImg, updateFollowUser, updateReDownloadImg } from './sqlite'
 import type { PhoneImgDownloadInfo } from 'types/phoneImgDownloadInfo'
 import { exiftool } from 'exiftool-vendored'
+import { messageLog } from './message_log'
 
 // 开始查询 redownloadimg 表 重新下载超时照片
 async function downloadTimeoutImages() {
@@ -21,7 +22,7 @@ async function downloadTimeoutImages() {
       updateReDownloadImg.run(img.id)
     } catch (error) {
       // 记录错误日志或者进行其他错误处理
-      console.error(`下载超时图片失败: ${error}`)
+      messageLog({message:`下载超时图片失败: ${error}`})
     }
   }
 }
@@ -111,6 +112,6 @@ async function main() {
 main().then(() => {
   process.exit()
 }).catch(error => {
-  console.error(`程序出现错误: ${error}`)
+  messageLog({message:`程序出现错误: ${error}`})
   process.exit(1)
 })

@@ -39,7 +39,7 @@ export function http(log = messageLog) {
     },
     (error) => {
       log(error)
-      // return Promise.reject(error)
+      return Promise.resolve()
     }
   )
 
@@ -66,7 +66,7 @@ export function downloadImg(log  = messageLog) {
   img.interceptors.response.use(null,
     (error) => {
       log(error)
-      // return Promise.reject(error)
+      return Promise.resolve()
     }
   )
   return img
@@ -105,7 +105,7 @@ export function phoneHttp(log  = messageLog) {
     },
     (error) => {
       log(error)
-      // return Promise.reject(error)
+      return Promise.resolve()
     }
   )
 

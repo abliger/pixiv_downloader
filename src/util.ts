@@ -5,6 +5,7 @@ import { downloadImg } from './axios'
 import { insertReDownloadImg, selectImgByImgId, selectReDownloadImgByUrl } from './sqlite'
 import term from './term'
 import { exiftool } from 'exiftool-vendored'
+import { messageLog } from './message_log'
 
 let countTimeout =0 
 setInterval(()=>{
@@ -73,7 +74,7 @@ export default {
       })
     } catch (error) {
       if (error instanceof Error) {
-        console.error(`写入文件额外信息失败: ${error.message}`)
+        messageLog({message:`写入文件额外信息失败: ${error.message}`,path:undefined,stack:error.stack})
         exiftool.closeChildProcesses()
       }
       return null
@@ -87,17 +88,14 @@ export default {
         await Bun.write(Bun.file(fileName), response.data)
         await this.writeExtraFileInfo(fileName, description, tag)
       }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
+      if (e instanceof Error) {
+        messageLog({message: e.message,path:undefined,stack:e.stack})
+      }
       countTimeout++
       const count = selectReDownloadImgByUrl.get(url) as { count: number }
       if (count.count === 0) {
-        // 如果下载失败，尝试插入重新下载记录，但要确保在插入操作失败时也能正确处理
-        try {
-          insertReDownloadImg.run(id, content, url, false)
-        } catch (insertError) {
-          console.error(`插入重新下载记录失败: ${insertError}`)
-        }
+        insertReDownloadImg.run(id, content, url, false)
       }
       if (countTimeout > 10) {
         throw new Error('网络不稳定，请稍后再试')

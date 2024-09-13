@@ -22,6 +22,7 @@ class termLine {
           })
           this.#spinnerIns.text = ''
           resolve(key === 'n' ? false : true)
+          input.removeListener('keypress',()=>{})
         }
       })
     })

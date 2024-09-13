@@ -2,35 +2,37 @@ import type { Cookie } from 'puppeteer'
 import { Login } from 'src/login'
 import db from 'src/sqlite'
 
-const selectMyInfo = db.prepare('SELECT * FROM account WHERE id = 1')
-const { cookies, user_id } = selectMyInfo.get() as { id: number, cookies: string, user_id: string }
+const selectAccountInfo = db.prepare('SELECT * FROM account WHERE id = 1')
+const { id, cookies, user_id } = selectAccountInfo.get() as { id: number, cookies: string, user_id: string }
 let userId: string = user_id
-selectMyInfo.finalize()
+selectAccountInfo.finalize()
+
 let cookieArray: Cookie[] | undefined
 if (cookies) {
   cookieArray = JSON.parse(cookies)
 } else {
-  cookieArray = await getAndSaveCookies()
+  cookieArray = await fetchAndSaveCookies()
 }
 
-
-async function getAndSaveCookies() {
-  try {
-    const cookieArray = await Login(process.env.USERNAME, process.env.PASSWORD)
-    const c = cookieArray.find(it => it.name === 'PHPSESSID')
-    userId = c?.value.split('_')[0] as string
-    const saveMyInfo = db.prepare('update account set cookies=?, user_id=? where id = ?')
-    saveMyInfo.run(JSON.stringify(cookieArray), userId, 1)
-    saveMyInfo.finalize()
-    return cookieArray
-  } catch (e) {
-    if (e instanceof Error) {
-      console.log(e.message)
-    }
+async function fetchAndSaveCookies() {
+  const newCookieArray = await Login(process.env.USERNAME, process.env.PASSWORD)
+  const sessionCookie = newCookieArray.find((it) => it.name === 'PHPSESSID')
+  if (sessionCookie) {
+    userId = sessionCookie.value.split('_')[0] as string
+    const saveAccountInfo = db.transaction(() => {
+      const updateStmt = db.prepare('UPDATE account SET cookies =?, user_id =? WHERE id =?')
+      updateStmt.run(JSON.stringify(newCookieArray), userId, id)
+      updateStmt.finalize()
+    })
+    await saveAccountInfo()
+    return newCookieArray
+  } else {
+    throw new Error('PHPSESSID cookie not found')
   }
 }
+
 export default {
   cookieArray,
   userId,
-  getAndSaveCookies
+  fetchAndSaveCookies,
 }

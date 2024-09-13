@@ -32,7 +32,7 @@ export function http(log = messageLog) {
     (value) => {
       if (value.data.error) {
         log(value.data)
-        cookie.getAndSaveCookies()
+        cookie.fetchAndSaveCookies()
         // return Promise.reject(value.data.message)
       }
       return value.data.body
@@ -98,7 +98,7 @@ export function phoneHttp(log  = messageLog) {
     (value) => {
       if (value.data.error) {
         log(value.data)
-        cookie.getAndSaveCookies()
+        cookie.fetchAndSaveCookies()
         // return Promise.reject(value.data.message)
       }
       return value.data.body

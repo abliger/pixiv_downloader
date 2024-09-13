@@ -1,5 +1,5 @@
 import puppeteer, { Page, type Cookie } from 'puppeteer'
-enum LoginMateData {
+enum LoginPageSelectors {
     LoginPath = 'https://accounts.pixiv.net/login?return_to=https%3A%2F%2Fwww.pixiv.net%2F&lang=zh&source=pc&view_type=page',
     UserInputLocation = '#app-mount-point > div > div > div.sc-fvq2qx-4.bVIVOB > div.sc-2oz7me-0.bOKfsa > div.sc-fg9pwe-2.cFfXcg > div > div > div > form > fieldset.sc-bn9ph6-0.bYwpCj.sc-2o1uwj-4.jZgbmK > label > input',
     PasswordInputLocation = '#app-mount-point > div > div > div.sc-fvq2qx-4.bVIVOB > div.sc-2oz7me-0.bOKfsa > div.sc-fg9pwe-2.cFfXcg > div > div > div > form > fieldset.sc-bn9ph6-0.bYwpCj.sc-2o1uwj-5.duclA-d > label > input',
@@ -15,18 +15,23 @@ enum LoginMateData {
 export async function Login(username: string, password: string): Promise<Cookie[]> {
   const browser = await puppeteer.launch({ headless: Boolean(process.env.HEADLESS) })
   const page = await browser.newPage()
-  await page.goto(LoginMateData.LoginPath)
-  await scroll(800, page)
-  await page.locator(LoginMateData.UserInputLocation).fill(username)
-  await page.locator(LoginMateData.PasswordInputLocation).fill(password)
-  await Bun.sleep(Math.floor(Math.random() * 100))
-  await page.locator(LoginMateData.ToLoginButtonLocation).click()
-  while (page.url() === LoginMateData.LoginPath) {
-    await Bun.sleep(1000)
+  try {
+    await page.goto(LoginPageSelectors.LoginPath)
+    await scroll(800, page)
+    await page.locator(LoginPageSelectors.UserInputLocation).fill(username)
+    await page.locator(LoginPageSelectors.PasswordInputLocation).fill(password)
+    await Bun.sleep(Math.floor(Math.random() * 100))
+    await page.locator(LoginPageSelectors.ToLoginButtonLocation).click()
+    await page.waitForNavigation()
+    const cookies = await page.cookies()
+    return cookies
+  } catch (error) {
+    // 记录错误日志或者进行其他错误处理
+    console.error(`登录失败: ${error}`)
+    throw error
+  } finally {
+    await browser.close()
   }
-  const cookies = await page.cookies()
-  await browser.close()
-  return cookies
 }
 /**
  * 模拟用户翻滚 

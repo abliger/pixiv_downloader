@@ -51,6 +51,6 @@ export const selectImgByImgId = db.query('select count(*) count from img where i
 // export const selectImgByImgId = db.query('select img_id img_id from img where img_id in (?) group by img_id') // where in operate is error
 export const selectReDownloadImg = db.query('select * from reDownloadImg where finish=0')
 export const selectReDownloadImgByUrl = db.query('select count(*) count from reDownloadImg where finish=0 and url=?')
-export const insetReDownloadImg = db.query('insert into reDownloadImg(img_id,content,url,finish) values(?,?,?,?)')
+export const insertReDownloadImg = db.query('insert into reDownloadImg(img_id,content,url,finish) values(?,?,?,?)')
 export const updateReDownloadImg = db.query('update reDownloadImg set finish=1 where id=?')
 export default db

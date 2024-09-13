@@ -2,7 +2,7 @@ import type { ImgInfo, ImgTag } from 'types/img_info'
 import pixiv_api from './pixiv_api'
 import type { Displaytag, PhoneImgDownloadInfo } from 'types/phoneImgDownloadInfo'
 import { downloadImg } from './axios'
-import { insetReDownloadImg, selectImgByImgId, selectReDownloadImgByUrl } from './sqlite'
+import { insertReDownloadImg, selectImgByImgId, selectReDownloadImgByUrl } from './sqlite'
 import term from './term'
 import { exiftool } from 'exiftool-vendored'
 
@@ -64,33 +64,45 @@ export default {
     return imgs
   },
   async writeExtraFileInfo(fileName: string, description: string, tag: string[]) {
-    const result= await exiftool.write(fileName, {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      MDItemFinderComment: description,
-      MDItemUserTags: tag
-    })
-    return result
+    try {
+      return await exiftool.write(fileName, {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        MDItemFinderComment: description,
+        MDItemUserTags: tag
+      })
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(`写入文件额外信息失败: ${error.message}`)
+        exiftool.closeChildProcesses()
+      }
+      return null
+    }
   },
   
   async download(fileName: string, url: string, description: string, tag: string[], id: string, content: string) {
-    const data=await downloadImg().get(url, {
-      responseType: 'arraybuffer'
-    }).catch(() => {
-      countTimeout +=1
-      const count = selectReDownloadImgByUrl.get(url) as {count:number}
-      if(count.count === 0){
-        insetReDownloadImg.run(id, content, url, false)
+    try {
+      const response = await downloadImg().get(url, { responseType: 'arraybuffer' })
+      if (response) {
+        await Bun.write(Bun.file(fileName), response.data)
+        await this.writeExtraFileInfo(fileName, description, tag)
       }
-      // 100 秒内超时10次退出程序
-      if(countTimeout >10){
-        throw new Error('网络不稳定,请稍后再试')
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (e) {
+      countTimeout++
+      const count = selectReDownloadImgByUrl.get(url) as { count: number }
+      if (count.count === 0) {
+        // 如果下载失败，尝试插入重新下载记录，但要确保在插入操作失败时也能正确处理
+        try {
+          insertReDownloadImg.run(id, content, url, false)
+        } catch (insertError) {
+          console.error(`插入重新下载记录失败: ${insertError}`)
+        }
       }
-    })
-    if(data){
-      await Bun.write(Bun.file(fileName), data.data)
-      await this.writeExtraFileInfo(fileName, description, tag)
-    }
+      if (countTimeout > 10) {
+        throw new Error('网络不稳定，请稍后再试')
+      }
+    } 
   }
 }
 export function objMix<T>(arrOut: T[], oriArr: T[], key: keyof T) {

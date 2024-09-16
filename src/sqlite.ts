@@ -1,12 +1,10 @@
 import { Database } from 'bun:sqlite'
-import termLine from './term'
 import type { User } from 'types/follow_user_info'
 const db = new Database('pixiv.db', { create: true })
 db.run('pragma busy_timeout = 500000;')
 const tables = db.query('select count(*) count from sqlite_master').get() as { count: number }
 // 如果数据库没有表执行 table.sql 文件
 if (tables.count === 0) {
-  termLine.spinner('准备数据')
   const migration = await Bun.file('./sql/table.sql').text()
   db.exec(migration)
   const insert_cookies = db.query('insert into account(id,cookies) values(@id,@cookies)')
@@ -14,7 +12,6 @@ if (tables.count === 0) {
     id: 1,
     cookies: null
   })
-  termLine.write('准备完毕')
 }
 export function prepareInsertFollowUserAndGetNotFinish() {
   type Obj={userName:string,userId:string}

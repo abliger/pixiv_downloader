@@ -1,4 +1,4 @@
-declare module "bun" {
+declare module 'bun' {
     interface Env {
         USERNAME: string;
         PASSWORD: string;
@@ -6,5 +6,4 @@ declare module "bun" {
         SAVEEXTRAINFO: string;
     }
 }
-import type pixiv from "./types/pixiv";
-export declare const pixivRes = pixiv
+export = {}

@@ -8,7 +8,6 @@ import type { FollowUserInfo, User } from 'types/follow_user_info'
 import type { Mangaa, PhoneImgDownloadInfo } from 'types/phoneImgDownloadInfo'
 import util, { translationTag } from './util'
 import { insertImg, selectImgByUrl } from './sqlite'
-import term from './term'
 
 const service = http()
 const phoneService = phoneHttp()
@@ -62,7 +61,7 @@ class Pixiv {
     const user: User[] = []
     const info = await this.getFollowPageInfo(userId)
     if(!info){
-      term.writeLine('获取不到最新用户数据,从数据库查找用户')
+      console.error('获取不到最新用户数据,从数据库查找用户')
       return []
     }
     const { users, total } = info

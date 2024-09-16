@@ -3,14 +3,13 @@ import pixiv_api from './pixiv_api'
 import type { Displaytag, PhoneImgDownloadInfo } from 'types/phoneImgDownloadInfo'
 import { downloadImg } from './axios'
 import { insertReDownloadImg, selectImgByImgId, selectReDownloadImgByUrl } from './sqlite'
-import term from './term'
 import { exiftool } from 'exiftool-vendored'
 import { messageLog } from './message_log'
 
-let countTimeout =0 
-setInterval(()=>{
+let countTimeout = 0
+setInterval(() => {
   countTimeout = 0
-},100000)
+}, 100000)
 
 export default {
   async getUserImgAll(userid: string) {
@@ -34,31 +33,32 @@ export default {
     }
     return [imgInfos, imgTags]
   },
-  async getUserImgAllByPhone(userId: string,userName:string) {
+  async getUserImgAllByPhone(userId: string, userName: string) {
     const userAllInfo = await pixiv_api.getUserProfileAll(userId)
     if (!userAllInfo) {
       return []
     }
     // todo bun sqlite where in operate is error
-    const imgIds = Object.keys(userAllInfo.illusts).filter(v=>{
-      const count =selectImgByImgId.get(v) as {count:number}
-      return count.count===0?true:false
+    const imgIds = Object.keys(userAllInfo.illusts).filter(v => {
+      const count = selectImgByImgId.get(v) as { count: number }
+      return count.count === 0 ? true : false
     })
-    
-    const imgs:PhoneImgDownloadInfo[]=[]
-    let currentId=0
-    term.spinner(`获得 ${userName} 的插画信息`)
-    const termSuffix=term.spinnerEq('spinnerSuffix')
-    while(currentId<=imgIds.length){
-      termSuffix(Math.floor(imgIds.length/5)+1)
-      const ids=imgIds.slice(currentId,currentId+5)
-      const imgTemp=await Promise.all(ids.map(async v => {
+
+    const imgs: PhoneImgDownloadInfo[] = []
+    let currentId = 0
+    console.log(`获得 ${userName} 的插画信息`)
+    let countM = 0
+    while (currentId <= imgIds.length) {
+      countM += 1
+      console.log(`当前位置: ${countM} 总计: ${imgIds.length}`)
+      const ids = imgIds.slice(currentId, currentId + 5)
+      const imgTemp = await Promise.all(ids.map(async v => {
         return await pixiv_api.getImgTagInfo_Tag_Info_DownloadInfo(v)
-      })).catch(()=>[])
+      })).catch(() => [])
       imgs.push(...imgTemp)
-      currentId+=5
+      currentId += 5
       //  如果作者插画太多,减慢请求频率
-      if(imgIds.length>50){
+      if (imgIds.length > 50) {
         await Bun.sleep(100)
       }
     }
@@ -74,13 +74,13 @@ export default {
       })
     } catch (error) {
       if (error instanceof Error) {
-        messageLog({message:`写入文件额外信息失败: ${error.message}`,path:undefined,stack:error.stack})
+        messageLog({ message: `写入文件额外信息失败: ${error.message}`, path: undefined, stack: error.stack })
         exiftool.closeChildProcesses()
       }
       return null
     }
   },
-  
+
   async download(fileName: string, url: string, description: string, tag: string[], id: string, content: string) {
     try {
       const response = await downloadImg().get(url, { responseType: 'arraybuffer' })
@@ -90,7 +90,7 @@ export default {
       }
     } catch (e) {
       if (e instanceof Error) {
-        messageLog({message: e.message,path:undefined,stack:e.stack})
+        messageLog({ message: e.message, path: undefined, stack: e.stack })
       }
       countTimeout++
       const count = selectReDownloadImgByUrl.get(url) as { count: number }
@@ -100,7 +100,8 @@ export default {
       if (countTimeout > 10) {
         throw new Error('网络不稳定，请稍后再试')
       }
-    } 
+      return
+    }
   }
 }
 export function objMix<T>(arrOut: T[], oriArr: T[], key: keyof T) {

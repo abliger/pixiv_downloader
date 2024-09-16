@@ -6,7 +6,8 @@
   "scripts": {
     "start": "bun run src/index.ts",
     "build": "bun build src/index.ts --compile --outfile pixivDownload",
-    "cron": "sudo echo '* * 0/2 * * cd /Users/fengsixue/Desktop/ttt/|nohup ./pixivDownload &'| crontab",
+    "buildlast": "bun build src/lastImg.ts --compile --outfile pixivLast",
+    "cron": "sudo echo '* * 0/1 * * cd /Users/fengsixue/Desktop/ttt/|nohup ./pixivLast &'| crontab",
     "removeCron": "crontab -r"
   },
   "devDependencies": {

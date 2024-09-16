@@ -1,0 +1,59 @@
+import pixiv_api from './pixiv_api'
+
+import {  selectImgByImgId, selectReDownloadImg,  updateReDownloadImg } from './sqlite'
+import type { PhoneImgDownloadInfo } from 'types/phoneImgDownloadInfo'
+import { exiftool } from 'exiftool-vendored'
+import { messageLog } from './message_log'
+
+// 开始查询 redownloadimg 表 重新下载超时照片
+async function downloadTimeoutImages() {
+  const allImages = selectReDownloadImg.all() as { id: string, img_id: string, content: string, url: string, finish: boolean }[]
+  let count = 0
+  for (const img of allImages) {
+    count += 1
+    try {
+      const info = { illust_details: JSON.parse(img.content) } as PhoneImgDownloadInfo
+      console.log(`下载超时图片 作者: ${info.illust_details.author_details.user_name} 图片: ${info.illust_details.title ? info.illust_details.title : 'unknow'} id: ${info.illust_details.id} 当前位置: ${count} 总计: ${allImages.length}`)
+      await pixiv_api.download(info)
+      updateReDownloadImg.run(img.id)
+    } catch (error) {
+      // 记录错误日志或者进行其他错误处理
+      messageLog({ message: `下载超时图片失败: ${error}` })
+    }
+  }
+}
+// 下载最新图片
+async function downloadLatestImages() {
+  console.log('下载最新图片\n')
+  const imgs = await pixiv_api.followLatestIllust()
+  if (!imgs) {
+    console.log('获取最新图片失败')
+  } else {
+    let countN = 0
+    for (const imgid of imgs.page.ids) {
+      countN += 1
+      console.log(`当前位置: ${countN} 总计: ${imgs.page.ids.length}`)
+      const count = selectImgByImgId.get(imgid) as { count: number }
+      if (count.count) {
+        continue
+      }
+      const info = await pixiv_api.getImgTagInfo_Tag_Info_DownloadInfo(String(imgid))
+      if (info) {
+        await pixiv_api.download(info)
+      }
+    }
+  }
+}
+
+async function main() {
+  await downloadTimeoutImages()
+  await downloadLatestImages()
+  exiftool.end()
+}
+
+main().then(() => {
+  process.exit()
+}).catch(error => {
+  messageLog({ message: `程序出现错误: ${error}` })
+  process.exit(1)
+})

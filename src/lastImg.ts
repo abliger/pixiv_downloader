@@ -24,7 +24,7 @@ async function downloadTimeoutImages() {
 }
 // 下载最新图片
 async function downloadLatestImages() {
-  console.log('下载最新图片\n')
+  console.log('下载最新图片')
   const imgs = await pixiv_api.followLatestIllust()
   if (!imgs) {
     console.log('获取最新图片失败')
@@ -48,12 +48,11 @@ async function downloadLatestImages() {
 async function main() {
   await downloadTimeoutImages()
   await downloadLatestImages()
-  exiftool.end()
 }
 
-main().then(() => {
-  process.exit()
-}).catch(error => {
+main().catch(error => {
   messageLog({ message: `程序出现错误: ${error}` })
-  process.exit(1)
+}).finally(() => {
+  exiftool.end()
+  process.exit()
 })

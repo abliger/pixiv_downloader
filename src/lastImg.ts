@@ -1,6 +1,6 @@
 import pixiv_api from './pixiv_api'
 
-import {  selectImgByImgId, selectReDownloadImg,  updateReDownloadImg } from './sqlite'
+import { selectImgByImgId, selectReDownloadImg, updateReDownloadImg } from './sqlite'
 import type { PhoneImgDownloadInfo } from 'types/phoneImgDownloadInfo'
 import { exiftool } from 'exiftool-vendored'
 import { messageLog } from './message_log'

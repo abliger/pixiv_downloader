@@ -36,7 +36,7 @@ export default {
   async getUserImgAllByPhone(userId: string, userName: string) {
     const userAllInfo = await pixiv_api.getUserProfileAll(userId)
     if (!userAllInfo) {
-      return []
+      throw new Error(`没有获取到 ${userName} 的插画信息,请排查网络后再试`)
     }
     // todo bun sqlite where in operate is error
     const imgIds = Object.keys(userAllInfo.illusts).filter(v => {

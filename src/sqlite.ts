@@ -14,11 +14,11 @@ if (tables.count === 0) {
   })
 }
 export function prepareInsertFollowUserAndGetNotFinish() {
-  type Obj={userName:string,userId:string}
+  type Obj = { userName: string, userId: string }
   const insertFollowUser = db.query('insert into follow_user(user_name,user_id,user_comment,finish) values(@user_name,@user_id,@user_comment,@finish)')
   const selectFollowUser = db.query('select *,count(*) count from follow_user where user_id=?')
-  const selectFollowUserByFinishEqZero=db.query('select * from follow_user where finish=0')
-  return function(user: User[]) {
+  const selectFollowUserByFinishEqZero = db.query('select * from follow_user where finish=0')
+  return function (user: User[]) {
     const needImgDownloadUser: Obj[] = []
     user.forEach(v => {
       const count = selectFollowUser.get(v.userId) as { count: number, finish: boolean }
@@ -29,8 +29,13 @@ export function prepareInsertFollowUserAndGetNotFinish() {
         needImgDownloadUser.push(v)
       }
     })
-    if(user.length===0){
-      const all=selectFollowUserByFinishEqZero.all() as Obj[]
+    if (user.length === 0) {
+      const all = (selectFollowUserByFinishEqZero.all() as { user_name: string, user_id: string }[]).map(v => {
+        return {
+          userName: v.user_name,
+          userId: v.user_id
+        }
+      })
       needImgDownloadUser.push(...all)
     }
     insertFollowUser.finalize()

@@ -72,7 +72,15 @@ async function downloadUserImages(users: { user_name: string, user_id: string, u
     countN += 1
     console.log(`当前位置: ${countN} 总计: ${users.length}`)
     let flag = false
-    let imgAll = await util.getUserImgAllByPhone(u.user_id, u.user_name)
+    let isError = false
+    let imgAll = await util.getUserImgAllByPhone(u.user_id, u.user_name).catch(() => {
+      isError = true
+      return []
+    })
+    if (isError) {
+      console.log(`获取用户 ${u.user_name} 的插画信息失败,可能是网络问题,请稍后重试`)
+      continue
+    }
     if (imgAll.length === 0) {
       updateFollowUser.run(u.user_id)
     }
@@ -80,6 +88,7 @@ async function downloadUserImages(users: { user_name: string, user_id: string, u
       if (v) {
         return v
       } else {
+        // 如果获取图片信息失败,则标记为需要重新下载
         flag = true
         return false
       }

@@ -8,7 +8,7 @@ let userId: string = user_id
 selectAccountInfo.finalize()
 
 let cookieArray: Cookie[] | undefined
-if (cookies) {
+if (cookies && cookies !== 'null' && cookies !== 'undefined') {
   cookieArray = JSON.parse(cookies)
 } else {
   cookieArray = await fetchAndSaveCookies()

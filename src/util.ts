@@ -62,6 +62,9 @@ export default {
         await Bun.sleep(100)
       }
     }
+    if(imgs.length === 0 && imgIds.length > 0) {
+      throw new Error(`没有获取到 ${userName} 的插画信息,请排查网络后再试`)
+    }
     return imgs
   },
   async writeExtraFileInfo(fileName: string, description: string, tag: string[]) {

@@ -1,6 +1,6 @@
 import pixiv_api from './pixiv_api'
 
-import { selectImgByImgId, selectReDownloadImg, updateReDownloadImgTofinishById } from './sqlite'
+import { selectImgCountByImgId, selectReDownloadImg, updateReDownloadImgTofinishById } from './sqlite'
 import type { PhoneImgDownloadInfo } from 'types/phoneImgDownloadInfo'
 import { exiftool } from 'exiftool-vendored'
 import { messageLog } from './message_log'
@@ -33,7 +33,7 @@ async function downloadLatestImages() {
     for (const imgid of imgs.page.ids) {
       countN += 1
       console.log(`当前位置: ${countN} 总计: ${imgs.page.ids.length}`)
-      const count = selectImgByImgId.get(imgid) as { count: number }
+      const count = selectImgCountByImgId.get(imgid) as { count: number }
       if (count.count) {
         continue
       }

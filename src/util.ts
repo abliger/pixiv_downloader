@@ -1,6 +1,6 @@
 import type { ImgInfo, ImgTag } from 'types/img_info'
 import pixiv_api from './pixiv_api'
-import type { Displaytag, PhoneImgDownloadInfo } from 'types/phoneImgDownloadInfo'
+import type { Displaytag, Illustdetails, PhoneImgDownloadInfo } from 'types/phoneImgDownloadInfo'
 import { downloadImg } from './axios'
 import { insertReDownloadImg, selectImgByImgId, selectReDownloadImgByUrl } from './sqlite'
 import { exiftool } from 'exiftool-vendored'
@@ -34,9 +34,16 @@ export default {
       throw new Error(`没有获取到 ${userName} 的插画信息,请排查网络后再试`)
     }
     // todo bun sqlite where in operate is error
+    // 如果 userAllInfo.illusts 对应的是插画集则返回这个 id
     const imgIds = Object.keys(userAllInfo.illusts).filter(v => {
-      const count = selectImgByImgId.get(v) as { count: number }
-      return count.count === 0 ? true : false
+      const content = JSON.parse((selectImgByImgId.get(v) as {content: string}).content) as Illustdetails
+      if(!content){
+        return false
+      }else if(content.illust_images.length > 1) {
+        return false
+      }else{
+        return true
+      }
     })
 
     const imgs: PhoneImgDownloadInfo[] = []

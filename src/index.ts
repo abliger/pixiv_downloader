@@ -52,7 +52,7 @@ async function downloadLatestImages() {
     let countN = 0
     for (const imgid of imgs.page.ids) {
       countN += 1
-      console.log(`当前位置: ${countN} 总计: ${imgs.page.ids.length}`)
+      console.log(`当前位置: ${countN} 总计: ${imgs.page.ids.length} 图片ID: ${imgid} `)
       const count = selectImgCountByImgId.get(imgid) as { count: number }
       if (count.count) {
         continue
@@ -100,7 +100,7 @@ async function downloadUserImages(users: { user_name: string, user_id: string, u
     let countM = 0
     for (const info of imgAll) {
       countM += 1
-      console.log(`当前位置: ${countM} 总计: ${imgAll.length}`)
+      console.log(`当前位置: ${countM} 总计: ${imgAll.length} 图片: ${info.illust_details.title ? info.illust_details.title : 'unknow'} id: ${info.illust_details.id}  ${Number(info.illust_details.page_count) > 1?'page:'+info.illust_details.page_count:''}`)
       await pixiv_api.download(info)
     }
     if (!flag) {

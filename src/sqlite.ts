@@ -60,7 +60,7 @@ export const updateFollowUserToFinishById = db.query('update follow_user set fin
 export const insertImg = db.query('insert into img(img_id,content,url) values(?,?,?)')
 export const selectImgByUrl = db.query('select count(*) count from img where url=?')
 export const selectImgCountByImgId = db.query('select count(*) count from img where img_id=?')
-export const selectImgByImgId = db.query('select * from img where img_id=?')
+export const selectImgByImgId = db.query('select * from img where img_id=? and content is not null')
 // export const selectImgByImgId = db.query('select img_id img_id from img where img_id in (?) group by img_id') // where in operate is error
 export const selectReDownloadImg = db.query('select * from reDownloadImg where finish=0')
 export const selectReDownloadImgByUrl = db.query('select count(*) count from reDownloadImg where finish=0 and url=?')

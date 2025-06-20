@@ -38,11 +38,11 @@ export default {
     const imgIds = Object.keys(userAllInfo.illusts).filter(v => {
       const content = JSON.parse((selectImgByImgId.get(v) as {content: string}).content) as Illustdetails
       if(!content){
-        return false
-      }else if(content.illust_images.length > 1) {
-        return false
-      }else{
         return true
+      }else if(content.illust_images && content.illust_images.length > 1) {
+        return true
+      }else{
+        return false
       }
     })
 

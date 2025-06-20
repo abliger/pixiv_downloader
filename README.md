@@ -9,21 +9,28 @@
 > 2. `sudo cp /opt/homebrew/bin/tag /usr/local/bin`
 
 ### 注意
+
 使用前添加  `.env` 文件
 
+如果想要自动登录按下面内容填写
+
+```text
+DOWNLOADLOCATION=*** # 下载位置
+USERNAME=*** # 用户
+PASSWORD=*** # 密码
 ```
-USERNAME=***
-PASSWORD=***
-DOWNLOADLOCATION=***
+
+如果自动登录有问题尝试获取 cookies 填写下面内容
+
+```text
+DOWNLOADLOCATION=*** # 下载位置
+COOKIES=*** # 注意需要 json 化
+ACCOUNTID=***
 ```
 
 分别填入用户名,密码,下载位置
 
 ### QA
-
-#### 运行错误
-
-如果完成上面的内容但是运行错误的,尝试把账号登陆完成的cookie存入 pixiv.db account表的ciikie字段中,并填写账号id.
 
 #### 报找不对应版本的chorme
 

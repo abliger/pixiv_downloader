@@ -8,6 +8,8 @@ enum LoginPageSelectors {
 
 /**
  * 登陆,由于使用 puppeteer 模拟登陆与 pixiv api分离
+ * todo 可能需要人机验证,如果出现验证码,需要手动输入
+ * 注意需要代理
  * @param username 用户
  * @param password 密码
  * @returns Cookies[]

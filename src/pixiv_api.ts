@@ -163,10 +163,19 @@ class Pixiv {
       }
     })
   }
-  // 下载图片
+  /**
+   * 下载手机端图片
+   * 手机端图片下载信息包含了图片的详细信息,可以直接下载
+   *   * 该方法会根据图片的详细信息,下载图片到指定目录
+   *   * 如果图片已经存在,则不会重复下载
+   *   * 如果图片是多页漫画,则会下载所有页面
+   *   * 如果图片是单页插画,则会下载大图
+   * @param img_info 手机图片下载信息
+   */
   async download(img_info: PhoneImgDownloadInfo) {
     const contentStr = JSON.stringify(img_info.illust_details)
     const date = new Date(img_info.illust_details.reupload_timestamp ? img_info.illust_details.reupload_timestamp * 1000 : img_info.illust_details.upload_timestamp * 1000)
+    // 如果是单页插画
     if (Number(img_info.illust_details.page_count) === 1) {
       const count = selectImgByUrl.get(img_info.illust_details.url_big) as { count: number }
       // const fileName = this.getfileName(img_info.author_details.user_name, img_info.illust_details.title, img_info.illust_details.id, date)
@@ -183,6 +192,9 @@ class Pixiv {
       insertImg.run(img_info.illust_details.id, contentStr, img_info.illust_details.url_big)
       return
     }
+    // 如果是多页漫画
+    // 需要下载所有页面
+    // 每次下载 4 张图片
     const imgInfos = img_info.illust_details.manga_a
     let current = 0
     while (current < imgInfos.length) {
@@ -200,6 +212,15 @@ class Pixiv {
     }
   }
 
+  /**
+   *  获取图片下载任务
+   * * 该方法用于获取图片下载任务,如果图片已经存在则不会重复下载
+   * @param url 图片下载链接
+   * @param img_info 手机图片下载信息
+   * @param contentStr  图片详细信息的字符串化
+   * @param date  图片上传时间
+   * @returns 
+   */
   private async getPromiseDownload(url:Mangaa,img_info:PhoneImgDownloadInfo,contentStr:string,date:Date){
     if (!url) {
       return

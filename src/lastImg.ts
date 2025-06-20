@@ -1,6 +1,6 @@
 import pixiv_api from './pixiv_api'
 
-import { selectImgByImgId, selectReDownloadImg, updateReDownloadImg } from './sqlite'
+import { selectImgByImgId, selectReDownloadImg, updateReDownloadImgTofinishById } from './sqlite'
 import type { PhoneImgDownloadInfo } from 'types/phoneImgDownloadInfo'
 import { exiftool } from 'exiftool-vendored'
 import { messageLog } from './message_log'
@@ -15,7 +15,7 @@ async function downloadTimeoutImages() {
       const info = { illust_details: JSON.parse(img.content) } as PhoneImgDownloadInfo
       console.log(`下载超时图片 作者: ${info.illust_details.author_details.user_name} 图片: ${info.illust_details.title ? info.illust_details.title : 'unknow'} id: ${info.illust_details.id} 当前位置: ${count} 总计: ${allImages.length}`)
       await pixiv_api.download(info)
-      updateReDownloadImg.run(img.id)
+      updateReDownloadImgTofinishById.run(img.id)
     } catch (error) {
       // 记录错误日志或者进行其他错误处理
       messageLog({ message: `下载超时图片失败: ${error}` })

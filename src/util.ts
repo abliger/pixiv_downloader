@@ -6,11 +6,6 @@ import { insertReDownloadImg, selectImgByImgId, selectReDownloadImgByUrl } from 
 import { exiftool } from 'exiftool-vendored'
 import { messageLog } from './message_log'
 
-let countTimeout = 0
-setInterval(() => {
-  countTimeout = 0
-}, 100000)
-
 export default {
   async getUserImgAll(userid: string) {
     const { can_send } = await pixiv_api.isUserCanSend(userid)
@@ -95,13 +90,9 @@ export default {
       if (e instanceof Error) {
         messageLog({ message: e.message, path: undefined, stack: e.stack })
       }
-      countTimeout++
       const count = selectReDownloadImgByUrl.get(url) as { count: number }
       if (count.count === 0) {
         insertReDownloadImg.run(id, content, url, false)
-      }
-      if (countTimeout > 10) {
-        throw new Error('网络不稳定，请稍后再试')
       }
       return
     }

@@ -3,7 +3,7 @@ import cookie from './cookie'
 import pixiv_api from './pixiv_api'
 import util from './util'
 
-import { insertFollowUserAndGetNotFinish, selectImgByImgId, selectReDownloadImg, updateFollowUser, updateReDownloadImg } from './sqlite'
+import { insertFollowUserAndGetNotFinish, selectImgByImgId, selectReDownloadImg, updateFollowUserToFinishById, updateReDownloadImgTofinishById } from './sqlite'
 import type { PhoneImgDownloadInfo } from 'types/phoneImgDownloadInfo'
 import { exiftool } from 'exiftool-vendored'
 import { messageLog } from './message_log'
@@ -18,7 +18,7 @@ async function downloadTimeoutImages() {
       const info = { illust_details: JSON.parse(img.content) } as PhoneImgDownloadInfo
       console.log(`下载超时图片 作者: ${info.illust_details.author_details.user_name} 图片: ${info.illust_details.title ? info.illust_details.title : 'unknow'} id: ${info.illust_details.id} 当前位置: ${count} 总计: ${allImages.length}`)
       await pixiv_api.download(info)
-      updateReDownloadImg.run(img.id)
+      updateReDownloadImgTofinishById.run(img.id)
     } catch (error) {
       // 记录错误日志或者进行其他错误处理
       messageLog({ message: `下载超时图片失败: ${error}` })
@@ -70,7 +70,7 @@ async function downloadUserImages(users: { user_name: string, user_id: string, u
   let countN = 0
   for (const u of users) {
     countN += 1
-    console.log(`当前位置: ${countN} 总计: ${users.length}`)
+    console.log(chalk.bgBlue(`当前位置: ${countN} 总计: ${users.length}`))
     let flag = false
     let isError = false
     let imgAll = await util.getUserImgAllByPhone(u.user_id, u.user_name).catch(() => {
@@ -78,11 +78,11 @@ async function downloadUserImages(users: { user_name: string, user_id: string, u
       return []
     })
     if (isError) {
-      console.log(`获取用户 ${u.user_name} 的插画信息失败,可能是网络问题,请稍后重试`)
+      console.log(chalk.red(`获取用户 ${u.user_name} 的插画信息失败,可能是网络问题,请稍后重试`))
       continue
     }
     if (imgAll.length === 0) {
-      updateFollowUser.run(u.user_id)
+      updateFollowUserToFinishById.run(u.user_id)
     }
     imgAll = imgAll.filter(v => {
       if (v) {
@@ -96,7 +96,7 @@ async function downloadUserImages(users: { user_name: string, user_id: string, u
     if (imgAll.length === 0) {
       continue
     }
-    console.log(`用户 ${u.user_name} 总计 ${imgAll.length} 开始下载`)
+    console.log(`用户 ${chalk.bgCyan(u.user_name)} 总计 ${chalk.bgGray(imgAll.length)} 开始下载`)
     let countM = 0
     for (const info of imgAll) {
       countM += 1
@@ -104,7 +104,7 @@ async function downloadUserImages(users: { user_name: string, user_id: string, u
       await pixiv_api.download(info)
     }
     if (!flag) {
-      updateFollowUser.run(u.user_id)
+      updateFollowUserToFinishById.run(u.user_id)
     }
   }
 }
